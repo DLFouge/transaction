@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.mapper.OrderMapper">
+
+	<!-- 数据库所对应的实体映射 -->
+	<!-- order数据库对应的实体 -->
+	<resultMap type="entity.Order" id="order">
+		<id property="orderId" column="orderId" />
+		<result property="orderTime" column="orderTime" />
+		<result property="total" column="total" />
+		<result property="status" column="status" />
+		<result property="address" column="address" />
+		<association property="user" javaType="entity.User">
+			<id property="uid" column="uid" />
+		</association>
+		<collection property="list" column="orderId" select="orderList"></collection>
+	</resultMap>
+
+	<!-- orderItem数据库表对应的实体 -->
+	<resultMap type="entity.OrderItem" id="orderItem">
+		<id property="orderItemId" column="orderItemId" />
+		<result property="quantity" column="quantity" />
+		<result property="subtotal" column="subtotal" />
+		<association property="goods" javaType="entity.Goods">
+			<id property="goodsId" column="goodsId" />
+			<result property="goodsName" column="goodsName" />
+			<result property="goodsPrice" column="goodsPrice" />
+			<result property="pictureTop" column="pictureTop"/>
+			<result property="pictureLeft" column="pictureLeft"/>
+			<result property="pictureRight" column="pictureRight"/>
+			<result property="pictureBottom" column="pictureBottom"/>
+		</association>
+	</resultMap>
+
+	<!-- 创建订单项 -->
+	<insert id="addOrder" parameterType="entity.Order">
+		insert into
+		m_order
+		values(#{orderId},#{orderTime},#{total},#{status},#{address},#{user.uid});
+	</insert>
+
+	<!-- 创建订单子项 -->
+	<insert id="addOrderItem" parameterType="java.util.List">
+		insert into
+		orderitem(orderItemId,quantity,subtotal,goodsId,goodsName,goodsPrice,pictureTop,pictureLeft,pictureRight,pictureBottom,orderId,status)
+		values
+		<foreach collection="list" item="item" separator=",">(#{item.orderItemId},
+			#{item.quantity},#{item.subtotal},#{item.goods.goodsId},#{item.goods.goodsName},#{item.goods.goodsPrice},
+			#{item.goods.pictureTop},#{item.goods.pictureLeft},#{item.goods.pictureRight},#{item.goods.pictureBottom},#{item.order.orderId},0)
+		</foreach>
+	</insert>
+	
+	<!-- 根据用户id查询出该用户总订单数 -->
+	<select id="selectAllOrderNumber" parameterType="java.util.Map"
+		resultType="int">
+		select count(*) from m_order where userId like #{uid};
+	</select>
+
+	<!-- 根据用户id和当前页面以及页面限定个数查询出所有订单 -->
+	<select id="selectAllOrder" parameterType="java.util.Map"
+		resultMap="order">
+		select * from m_order where userId like #{uid}
+		order by
+		orderTime desc limit
+		#{currentPage},#{constancePage} ;
+	</select>
+
+	<!-- 根据订单号查询出其下的订单子项 -->
+	<select id="orderList" resultMap="orderItem">
+		select * from orderitem where
+		orderId like #{oid} ;
+	</select>
+
+
+	<!-- 根据订单号查询出订单 -->
+	<select id="selectOrderByOid" parameterType="java.util.Map"
+		resultMap="order">
+		select * from m_order where orderId like #{oid};
+	</select>
+
+	<!-- 根据订单号和用户id取消订单 -->
+	<delete id="deleteOrderByOidAndUId">
+		delete from m_order where orderId like #{oid} and userId
+		like #{Uid};
+	</delete>
+	
+	<!-- 根据订单号取消订单子项 -->
+	<delete id="deleteAllOrderItem" parameterType="java.util.Map">
+		delete from
+		orderitem where orderId like #{oid};
+	</delete>
+
+	<!-- 更新订单状态 -->
+	<update id="updateOrderStatus" parameterType="java.util.Map">
+		update m_order set
+		status = #{status} where orderId like #{oid};
+	</update>
+
+	<!-- 根据用户id和当前订单状态以及页面限定个数查询出所有订单 -->
+	<select id="selectByStatus" parameterType="java.util.Map"
+		resultMap="order">
+		select * from m_order where userId like #{uid} and status = #{status}
+		order by
+		orderTime desc limit
+		#{currentPage},#{constancePage} ;
+	</select>
+	
+	<!-- 根据用户id和订单状态查询出该用户总订单数 -->
+	<select id="selectAllByStatus" parameterType="java.util.Map"
+		resultType="int">
+		select count(*) from m_order where userId like #{uid} and status = #{status};
+	</select>
+	
+</mapper>

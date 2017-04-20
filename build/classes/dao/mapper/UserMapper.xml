@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.mapper.UserMapper">
+
+	<!-- 数据库所对应的实体映射 -->
+	<!-- order数据库对应的实体 -->
+	<resultMap type="entity.User" id="userBean">
+		<id property="uid" column="uid" />
+		<result property="userName" column="userName" />
+		<association property="userInfo" javaType="entity.UserInfo">
+			<id property="userInfoId" column="userInfoId" />
+			<result property="userId" column="userId"/>
+			<result property="nickName" column="nickName"/>
+			<result property="realName" column="realName"/>
+			<result property="gender" column="gender"/>
+			<result property="birthday" column="birthday"/>
+			<result property="address" column="address"/>
+			<result property="photoAddress" column="photoAddress"/>
+			<result property="idetityCart" column="idetityCart"/>
+			<result property="studentCart" column="studentCart"/>
+		</association>
+	</resultMap>
+	
+	<!-- 增加信息无误的用户 -->
+	<insert id="addUser" parameterType="entity.User">
+		insert into
+		user(uid,username,password,email,status,authority,activationCode,applyStatus)
+		values(#{uid},#{userName},#{password},#{email},#{status},#{authority},#{activationCode},#{applyStatus});
+	</insert>
+
+	<!-- 根据激活查询用户 -->
+	<select id="selectUserByActivationCode" parameterType="java.util.Map"
+		resultType="entity.User">
+		select * from user where activationCode =
+		#{activationCode};
+	</select>
+
+	<!-- 修改用户状态 -->
+	<update id="activateUserStatus" parameterType="java.util.Map">
+		update user set
+		status = 1 where uid = #{uid};
+	</update>
+
+	<!-- 根据用户名和密码查询用户 -->
+	<select id="selectUserByUnAndPwd" parameterType="java.util.Map"
+		resultType="entity.User">
+		select * from user where userName like #{username} and
+		password like #{password};
+	</select>
+	
+	<!-- 更新用户密码 -->
+	<update id="updatePassword" parameterType="java.util.Map">
+		update user set password = #{newPassword} where uid like #{uid};
+	</update>
+	
+	<!-- 查询邮箱地址是否存在 -->
+	<select id="emailIsExist" parameterType="java.util.Map" resultType="string">
+		select uid from user where email = #{email};
+	</select>
+	<!-- 查询用户名是否存在 -->
+	<select id="usernameIsExist" parameterType="java.util.Map" resultType="int">
+		select count(*) from user where userName = #{username};
+	</select>
+	
+	<!-- 管理员模块 -->
+	<resultMap type="entity.Admin" id="admin">
+		<id property="adminId" column="adminId"/>
+		<result property="adminName" column="adminName"/>
+		<result property="password" column="password"/>
+	</resultMap>
+	
+	<!-- 管理员登陆 -->
+	<select id="login" parameterType="java.util.Map" resultMap="admin">
+		select * from admin where adminName like #{loginname} and password like
+		#{password};
+	</select>
+	
+	<!-- 根据用户id查询用户信息 -->
+	<select id="selectUserInfo" parameterType="java.util.Map" resultType="entity.UserInfo">
+			select * from userinfo where userId = #{uid};
+	</select>
+	
+	<!-- 更新用户开店权限 -->
+	<update id="updateUserRight" parameterType="java.util.Map">
+		update user set applyStatus = 1 where uid = #{uid}
+	</update>
+	
+	<!-- 查询申请开店的所有用户 -->
+	<select id="allApplyUser" parameterType="java.util.Map" resultType="int">
+		 select count(*) from user where applyStatus = #{status};
+	</select>
+	
+	<!-- 查询给定数量的申请开店用户 -->
+	<select id="selectAllApplyUser" parameterType="java.util.Map" resultMap="userBean">
+		select * from user u,userInfo f where u.uid = f.userId and applyStatus = ${status} limit #{currentPage},#{constancePage}
+	</select>
+	
+	<!-- 根据用户id更改用户状态 -->
+	<update id="updateUserStatus" parameterType="java.util.Map">
+	 	update user set applyStatus = #{status}
+		where uid =#{uid};
+	</update>
+</mapper>

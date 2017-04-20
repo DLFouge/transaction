@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.mapper.CartItemMapper">
+
+	<!-- 将数据库中数据与实体对应 -->
+	<resultMap type="entity.CartItem" id="cartItem">
+		<id property="cartId" column="cartId" />
+		<result property="quantity" column="quantity" />
+		<association property="good" javaType="entity.Goods">
+			<id property="goodsId" column="goodsId" />
+			<result property="goodsName" column="goodsName" />
+			<result property="goodsPrice" column="goodsPrice" />
+			<result property="goodsDescribe" column="goodsDescribe" />
+			<result property="pictureTop" column="pictureTop" />
+			<result property="pictureLeft" column="pictureLeft" />
+			<result property="pictureRight" column="pictureRight" />
+			<result property="pictureBottom" column="pictureBottom" />
+			<result property="onSaleTime" column="onSaleTime" />
+			<result property="degree" column="degree" />
+		</association>
+	</resultMap>
+
+	<!-- 根据用户id查询用户所有购买物品 -->
+	<select id="selectByUId" parameterType="java.util.Map"
+		resultMap="cartItem">
+		select * from cart c,goods g where c.goodsId = g.goodsId and
+		c.userId like #{uid} ;
+	</select>
+	
+	<!-- 根据用户id以及商品id查询购物车项 -->
+	<select id="selectByUIdAndGoodsId" parameterType="java.util.Map"
+		resultMap="cartItem">
+		select * from cart where userId like #{uid} and goodsId like
+		#{goodsId};
+	</select>
+	
+	<!-- 根据用户id,商品id,以及更新数量更新购物车项-->
+	<update id="updateCartItem" parameterType="java.util.Map">
+		update cart set
+		quantity = #{quantity} where userId like #{uid} and goodsId like #{goodsId}
+	</update>
+	
+	<!-- 新生成购物项 -->
+	<insert id="insertCartItem" parameterType="entity.CartItem">
+		insert into
+		cart(cartId,userId,goodsId,quantity)
+		values(#{cartId},#{user.uid},#{good.goodsId},#{quantity});
+	</insert>
+	
+	<!-- 批量删除购物项 -->
+	<delete id="deleteCartItem" parameterType="java.util.List">
+		delete from cart where cartId in
+		<foreach collection="list" item="item" open="(" separator=","
+			close=")">#{item}</foreach>
+	</delete>
+	
+	<!-- ajax根据对商品项和数量对商品进行异步加减操作 -->
+	<update id="ajaxJiaAndJian" parameterType="java.util.Map">
+		update cart set
+		quantity =#{quantity} where cartId like #{itemId};
+	</update>
+	
+	<!-- 根据商品项id查询出商品 -->
+	<select id="selectByCartItemId" parameterType="java.util.Map"
+		resultMap="cartItem">
+		select * from cart where cartId like
+		#{CartItemId};
+	</select>
+	
+	<!-- 查询当前用户所想买取得商品 -->
+	<select id="submitGoodsItem" parameterType="java.util.Map"
+		resultMap="cartItem">
+		select * from cart c,goods g where c.goodsId = g.goodsId and c.userId =
+		#{uid}
+		and cartId in
+		<foreach collection="list" open="(" separator="," close=")"
+			item="item">#{item}</foreach>
+	</select>
+
+</mapper>

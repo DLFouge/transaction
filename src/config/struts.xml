@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE struts PUBLIC  
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"  
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+
+	<!-- 将Action的创建交给spring来管理 -->
+	<constant name="struts.objectFactory" value="spring" />
+
+	<!-- 更改struts2请求Action的后缀名，默认为action。若想去掉后缀，设为","即可 -->
+	<constant name="struts.action.extension" value=","></constant>
+
+	<package name="abstract_struts" abstract="true" extends="struts-default"
+		namespace="/">
+		<!-- 公共东西可以放到这个抽象包下 -->
+	</package>
+	<!-- 用户模块 -->
+	<package name="registPackage" extends="struts-default">
+		
+		<!-- 验证码的产生 -->
+		<action name="rand" class="action.user.RegistAction"
+			method="verifyString">
+			<result type="stream">
+				<param name="contentType">image/jpeg</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+		
+		<!-- 用户注册 -->
+		<action name="regist" class="action.user.RegistAction" method="regist">
+		 	<result name="success">/msg.jsp</result>
+		 	<result name="input">/assets/pages/register.jsp</result>
+		</action>
+		
+		<!-- 用户申请开店 -->
+		<action name="applyForShop" class="action.user.ApplyForShop" method="updateUserInfo">
+			<result name="success">/msg.jsp</result>
+			<result name="input">/assets/pages/improveUserInfo.jsp</result>
+		</action>
+		
+		<!-- 邮箱认证 -->
+		<action name="activation" class="action.user.RegistAction" method="emailVerify">
+			<result name="success">/msg.jsp</result>
+		</action>
+		
+		<!-- 用户登录 -->
+		<action name="login" class="action.user.LoginAction" method="login">
+			<result name="success">/assets/pages/index.jsp</result>
+			<result name="input">/assets/pages/login.jsp</result>
+			<result name="error">/assets/pages/login.jsp</result>
+		</action>
+		
+		<!-- 用户退出 -->
+		<action name="exit" class="action.user.ExitAction" method="exit">
+			<result name="success">/assets/pages/login.jsp</result>
+		</action>	
+		
+		<!-- 用户修改密码 -->
+		<action name="updatePassword" class="action.user.ModifyPassword" method="modifyPassword">
+			<result name="success">/msg.jsp</result>
+			<result name="input">/assets/pages/changepass.jsp</result>
+		</action>	
+		
+		<!-- ajax异步验证用户验证码是否输入正确 -->
+		<action name="ajaxVerifyCode" class="action.user.LoginAction" method="ajaxVerifyCode">
+		</action>
+		
+		<!-- 用户找回密码 -->
+		<action name="sendEmailToFindPassword" class="action.user.FindPassword" method="sendEmail">
+			<result name="success">/msg.jsp</result>
+		</action>
+		
+		<!-- 页面ajax的动态验证用户名是否注册 -->
+		<action name="ajaxUsername" class="action.user.RegistAction" method="ajaxUsername">
+		</action>
+		
+		<!-- 页面ajax的动态验证邮箱地址是否存在 -->
+		<action name="ajaxEmail" class="action.user.RegistAction" method="ajaxEmail"></action>
+		
+		<!-- 用户找回设置密码 -->
+		<action name="fillPass" class="action.user.FindPassword" method="findPassword">
+			<result name="success">/msg.jsp</result>
+			<result name="input">/assets/pages/fillPass.jsp</result>
+		</action>
+		
+		<!-- 页面ajax的动态旧密码验证 -->
+		<action name="ajaxOldPassword" class="action.user.ModifyPassword" method="ajaxOldPassword"></action>
+		
+		<!-- 用户修改个人详细信息 -->
+		<action name="updateUserInfo" class="action.userInfo.UpdateUserInfo" method="updateUserInfo">
+			<result name="success">/msg.jsp</result>
+		</action>
+		
+		<!-- 用户查看个人信息 -->
+		<action name="viewUserInfo" class="action.userInfo.SelectUserInfo" method="selectUserInfo">
+			<result name="success">/assets/pages/userdetial.jsp</result>
+		</action>
+		<!-- 后台登录 -->
+		<action name="adminLogin" class="action.user.AdminLogin" method="login">
+			<result name="success">/admin/BackMain.jsp</result>
+			<result name="error">/admin/Login.jsp</result>
+		</action>
+		<!-- 管理员退出 -->
+		<action name="adminExit" class="action.user.AdminLogin" method="exit">
+			<result name="success">/admin/Login.jsp</result>
+			<result name="error">/admin/Login.jsp</result>
+		</action>
+		
+		<!-- 查看申请开店用户 -->
+		<action name="selectApplyUser" class="action.user.AdminManageUser" method="selectAllUser">
+			<result name="success">/admin/checkUserInfo.jsp</result>
+		</action>
+		
+		<!-- 更改用户权限 -->
+		<action name="updateUserStatus" class="action.user.AdminManageUser" method="updateUserStatus">
+			<result name="success">/admin/message.jsp</result>
+		</action>
+		
+		<!-- 管理员查看用户信息 -->
+		<action name="selectUserInfo" class="action.user.AdminManageUser" method="userDetial">
+			<result name="success">/admin/UserInfo.jsp</result>
+		</action>
+	</package>
+	
+	<!-- 分类模块 -->
+	<package name="category" extends="struts-default">
+	
+		<action name="selectAllCategory" class="action.category.SelectCategory" method="findAllCategory">
+			<result name="success">/assets/pages/middlepart.jsp</result>
+		</action>
+		
+		<!-- 查询一级分类 -->
+		<action name="findCategory" class="action.category.SelectCategory" method="findAllCategory">
+			<result name="success">/assets/pages/useruploadgoods.jsp</result>
+		</action>
+		
+		<!-- 后台 -->
+		<!-- 查询分类 -->
+		<action name="findAllCategory" class="action.category.BackCategoryAction" method="findAllCategory">
+			<result name="success">/admin/category/listcate.jsp</result>
+		</action>
+		<!-- 添加分类 -->
+		
+		<action name="addCategory" class="action.category.BackCategoryAction" method="addCategory">
+			<result name="success">/admin/category/listcate.jsp</result>
+		</action>
+		<!-- 查询所有一级分类 返回到add2页面-->
+		<action name="findAllFirstCategory" class="action.category.BackCategoryAction" method="findAllCategory">
+			<result name="success">/admin/category/addcate2.jsp</result>
+		</action>
+		<!-- 修改一级分类 -->
+		<action name="editFirstCategory" class="action.category.BackCategoryAction" method="editFirstCategory">
+			<result name="success">/admin/category/edit.jsp</result>
+		</action>
+		<!-- 查询所有一级分类 返回到edit2页面 -->
+		<action name="findAFCReturnToEdit" class="action.category.BackCategoryAction" method="findAllCategory">
+			<result name="success">/admin/category/editcate.jsp</result>
+		</action>
+		<!-- 修改子分类 -->
+		<action name="editSubCategory" class="action.category.BackCategoryAction" method="editSubCategory">
+			<result name="success">/admin/category/listcate.jsp</result>
+		</action>
+		
+		<!-- 删除一级分类 -->
+		<action name="deleteFirstCategory" class="action.category.BackCategoryAction" method="deleteCategory">
+			<result name="success">/admin/category/listcate.jsp</result>
+			<result name="error">/admin/msg.jsp</result>
+		</action>
+		
+		<!-- 删除二级分类 -->
+		<action name="deleteSecondCategory" class="action.category.BackCategoryAction" method="deleteSecondCategory">
+			<result name="success">/admin/category/listcate.jsp</result>
+			<result name="error">/admin/msg.jsp</result>
+		</action>
+		
+		<!-- 查询所有分类-->
+		<action name="findAllCategoryLeft" class="action.category.BackCategoryAction" method="findAllCategory">
+			<result name="success">/admin/book/left.jsp</result>
+		</action>
+		
+		<action name="ajaxFindSubCategory" class="action.category.BackCategoryAction" method="ajaxFindSubCategory">
+		</action>
+		
+		
+	</package>
+	<!-- 页面商品分页模块 -->
+	<package name="page" extends="struts-default">
+		<!-- 按商品分类查 -->
+		<action name="selectByCid" class="action.goods.SelectGoods"
+			method="selectByCid">
+			<result name="success">/assets/pages/goodslist.jsp</result>
+		</action>
+		<action name="selectbooks" class="action.goods.SelectGoods"
+			method="selectByCid">
+			<result name="success">/assets/pages/mainpagebooks.jsp</result>
+		</action>
+		<!-- 商品详情 -->
+		<action name="goodsDetail" class="action.good.SelectGoodDetail" method="selectById">
+			<result name="success">/assets/pages/salegoods.jsp</result>
+		</action>
+		
+		<!-- 根据商品新旧程度查询商品 -->
+		<action name="TheDegree" class="action.goods.SelectGoods" method="selectByDegree">
+			<result name="success">/assets/pages/goodslist.jsp</result>
+		</action>
+		
+		<!-- 根据商品价格查询商品 -->
+		<action name="selectByPrice" class="action.goods.SelectGoods" method="selectByPrice">
+			<result name="success">/assets/pages/goodslist.jsp</result>
+		</action>
+		
+		<!-- 根据商品名模糊查询 -->
+		<action name="selectByLike" class="action.goods.SelectGoods" method="selectByLike">
+			<result name="success">/assets/pages/goodslist.jsp</result>
+		</action>
+		<!-- 根据用户id查询商品 -->
+		<action name="selectByUid" class="action.goods.SelectGoods" method="selectAllGoodByUid">
+			<result name="success">/assets/pages/productup.jsp</result>
+		</action>
+		
+		<!-- 付款和发货查询 -->
+		<action name="payAndSend" class="action.goods.SelectGoods" method="payStatus"> 
+			<result name="success">/assets/pages/payAndSend.jsp</result>
+		</action>
+		
+		<!-- 更改用户发货状态 -->
+		<action name="sendGoods" class="action.goods.SelectGoods" method="updateStatus">
+			<result name="success">/assets/pages/payAndSend.jsp</result>
+		</action>
+	</package>
+	
+	<!-- 购物车模块 -->
+	<package name="cart" extends="struts-default">
+		<interceptors>
+			<interceptor name="login" class="interceptor.LoginInterceptor"></interceptor>
+			<interceptor-stack name="myDefaultStack">
+				<interceptor-ref name="login"></interceptor-ref>
+				<interceptor-ref name="params"></interceptor-ref>
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+
+		<!-- 引用自己所定义的拦截器 -->
+		<default-interceptor-ref name="myDefaultStack"></default-interceptor-ref>
+		<global-results>
+			<result name="msg">/assets/pages/login.jsp</result>
+		</global-results>
+		
+		<!-- 查询我的购物车 -->
+		<action name="myCart" class="action.cart.CartAction" method="cartItems">
+			<result name="success">/assets/pages/shoppingcart.jsp</result>
+		</action>
+		
+		<!-- 添加到购物车 -->
+		<action name="addToCart" class="action.cart.CartAction" method="addCartItem">
+			<result name="success">/assets/pages/shoppingcart.jsp</result>
+		</action>
+		
+		<!-- 客户端异步加减商品数量 -->
+		<action name="ajaxJiaAndJian" class="action.cart.CartAction" method="ajaxJiaAndJian">
+		</action>
+		
+		<!-- 提交用户想购买的商品 -->
+		<action name="submitCart" class="action.cart.CartAction" method="submitGoodsItem">
+			<result name="success">/assets/pages/showitem.jsp</result>
+		</action>
+		
+		<!-- 删除购物项商品 -->
+		<action name="deleteCart" class="action.cart.CartAction" method="deleteCartItem">
+			<result name="success">/assets/pages/shoppingcart.jsp</result>
+		</action>
+	</package>
+	
+	<package name="order" extends="struts-default">
+	    <!-- 创建订单 -->
+		<action name="createOrder" class="action.order.OrderAction" method="createOrder">
+			<result name="success">/assets/pages/order.jsp</result>
+		</action>
+		
+		<!-- 查询用户订单 -->
+		<action name="selectAllOrder" class="action.order.OrderAction" method="selectAllOrder">
+			<result name="success">/assets/pages/orderList.jsp</result>
+		</action>
+		
+		<!-- 根据订单号查询订单 -->
+		<action name="selectOrder" class="action.order.OrderAction" method="selectOrderByOid">
+			<result name="success">/assets/pages/pay.jsp</result>
+			<result name="error">/assets/pages/error.jsp</result>
+		</action>
+		
+		<!-- 根据订单号和用户id删除订单-->
+		<action name="deleteOrder" class="action.order.OrderAction" method="deleteOrderByOidAndUId">
+			<result name="success">/assets/pages/orderList.jsp</result>
+		</action>
+		
+		<!--根据订单号查询订单总价 -->
+		<action name="selectTotal" class="action.order.OrderAction"
+			method="selectTotal">
+			<result name="success">/assets/pages/pay.jsp</result>
+			<result name="error">/assets/pages/error.jsp</result>
+		</action>
+		
+		<!-- 根据订单号查询出订单 -->
+		<action name="selectOrderByOid" class="action.order.OrderAction"
+			method="selectOrderByOid">
+			<result name='success'>/assets/pages/desc.jsp</result>
+		</action>
+		
+		<!-- 更新用户状态 -->
+		<action name="updateStatus" class="action.order.OrderAction" method="updateOrderStatus">
+			<result name="success">/assets/pages/orderList.jsp</result>
+		</action>
+		
+		<!-- 根据订单状态查询订单 -->
+		<action name="selectByStatus" class="action.order.OrderAction" method="selectByStatus">
+			<result name="success">/assets/pages/orderList.jsp</result>
+		</action>
+		
+	</package>
+	
+	<!-- 付款 -->
+	<package name="payment" extends="struts-default">
+		
+		<action name="pay" class="action.order.PaymentAction" method="payment">
+		</action>
+	</package>
+	
+	<!-- 商品 -->
+	<package name="goods" extends="struts-default">
+	  	<action name="uploadGodds" class="action.good.AddGoods" method="addGoods">
+	  		<result name="success">/msg.jsp</result>
+	  	</action>
+	  	
+	  	<!-- 按商品id查询商品-->
+		<action name="selectById" class="action.good.SelectGoodDetail"
+			method="selectById">
+			<result name="success">/assets/pages/salegoods.jsp</result>
+		</action>
+		
+		
+		<action name="editGoods" class="action.good.SelectGoodDetail"
+			method="selectById">
+			<result name="success">/assets/pages/editGoods.jsp</result>
+		</action>
+		
+		<action name="editGoodsInform" class="action.good.EditGoods" method="updateGoodsInform">
+			<result name="success">/msg.jsp</result>
+		</action>
+	</package>
+	
+</struts>  

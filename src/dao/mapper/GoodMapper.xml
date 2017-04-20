@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.mapper.GoodMapper">
+
+	<!-- 将数据库中数据与Bookbean对应 -->
+	<resultMap type="entity.Goods" id="goodsbean">
+		<id property="goodsId" column="goodsId" />
+		<result property="goodsName" column="goodsName" />
+		<result property="goodsPrice" column="goodsPrice" />
+		<result property="goodsDescribe" column="goodsDescribe" />
+		<result property="onSaleTime" column="onSaleTime" />
+		<result property="degree" column="degree" />
+		<result property="pictureTop" column="pictureTop" />
+		<result property="pictureLeft" column="pictureLeft" />
+		<result property="pictureRight" column="pictureRight" />
+		<result property="pictureBottom" column="pictureBottom" />
+		<association property="category" javaType="entity.Category">
+			<id property="categoryId" column="categoryId" />
+			<result property="categoryName" column="categoryName" />
+		</association>
+
+	</resultMap>
+
+	<!-- 根据所属分类（cid）和当前页码和页码显示个数查询出商品 -->
+	<select id="selectByCid" parameterType="java.util.Map"
+		resultMap="goodsbean">
+		select * from goods where categoryId like
+		#{cid} limit
+		#{pageCode},#{limitNumber};
+	</select>
+
+	<!-- 根据所属分类查询出所有商品 -->
+	<select id="selectAllByCid" parameterType="java.util.Map"
+		resultType="int">
+		select count(*) from goods where categoryId like #{cid};
+	</select>
+
+	<!-- 根据新旧程度和当前页码和页码显示个数查询出商品 -->
+	<select id="selectByDegree" parameterType="java.util.Map"
+		resultMap="goodsbean">
+		select * from goods where degree like
+		#{degree} limit
+		#{pageCode},#{limitNumber};
+	</select>
+
+	<!-- 根据所属新旧查询出所有商品 -->
+	<select id="selectAllByDegree" parameterType="java.util.Map"
+		resultType="int">
+		select count(*) from goods where degree = #{degree};
+	</select>
+
+	<!-- 根据价格查询商品 -->
+	<select id="selectByPrice" parameterType="java.util.Map"
+		resultMap="goodsbean">
+		select * from goods where goodsPrice &gt;= #{price1} and
+		goodsPrice &lt;= #{price2} limit #{pageCode},#{limitNumber};
+	</select>
+
+	<!-- 根据价格查询出所有商品 -->
+	<select id="selectAllByPrice" parameterType="java.util.Map"
+		resultType="int">
+		select count(*) from goods where goodsPrice &gt;= #{price1}
+		and goodsPrice &lt;= #{price2};
+	</select>
+
+	<!-- 根据用户id查询用户上架商品 -->
+	<select id="selectByUid" parameterType="java.util.Map"
+		resultMap="goodsbean">
+		select * from goods where userId like
+		#{uid} limit
+		#{pageCode},#{limitNumber};
+	</select>
+
+	<!-- 根据用户id查询出所有商品 -->
+	<select id="countByUid" parameterType="java.util.Map"
+		resultType="int">
+		select count(*) from goods where userId = #{uid};
+	</select>
+
+	<!-- 更新商品信息 -->
+	<update id="updateGoodsInform" parameterType="java.util.Map">
+		update goods set
+		goodsName=#{goodsName},
+		goodsPrice=#{goodsPrice},goodsDescribe=#{goodsDescribe},onSaleTime=#{onSaleTime},degree=#{degree}
+		where goodsId =#{goodsId}
+	</update>
+
+	<!-- 将数据库中数据与Bookbean对应 -->
+	<resultMap type="entity.OrderItem" id="orderItem">
+		<id property="orderItemId" column="orderItemId" />
+		<result property="quantity" column="quantity" />
+		<result property="subtotal" column="subtotal" />
+		<association property="order" javaType="entity.Order">
+			<id property="orderId" column="orderId"/>
+			<result property="orderTime" column="orderTime"/>
+			<result property="address" column="address"/>
+		</association>
+		<association property="goods" javaType="entity.Goods">
+			<id property="goodsId" column="goodsId" />
+			<result property="goodsName" column="goodsName" />
+			<result property="goodsPrice" column="goodsPrice" />
+			<result property="pictureTop" column="pictureTop" />
+		</association>
+
+	</resultMap>
+
+	<!-- 根据订单状态查询已买商品 -->
+	<select id="selectByStatus" parameterType="java.util.Map"
+		resultMap="orderItem">
+		select
+		i.orderItemId,i.quantity,i.subtotal,i.goodsId,i.goodsName,i.goodsPrice,i.pictureTop,
+		o.orderId,o.orderTime,o.address
+		from goods g,m_order o,orderitem i where g.goodsId
+		= i.goodsId and
+		i.orderId = o.orderId and o.status &gt;=#{status} and
+		i.status=#{send} and g.userId = #{uid}
+		limit #{pageCode},#{limitNumber};
+	</select>
+	
+	<!-- 根据订单状态查询已买商品 -->
+	<select id="countByStatus" parameterType="java.util.Map"
+		resultType="int">
+		select
+		count(*)
+		from goods g,m_order o,orderitem i where g.goodsId
+		= i.goodsId and
+		i.orderId = o.orderId and o.status &gt;=#{status} and
+		i.status=#{send} and g.userId = #{uid}
+	</select>
+	
+	<!-- 更改发货状态 -->
+	<update id="updateStatus" parameterType="java.util.Map">
+		update orderitem set status = 1 where orderItemId =#{orderItemId}
+	</update>
+	
+	<!-- 根据书名模糊查询出所有商品 -->
+	<select id="selectAllByLike" parameterType="java.util.Map"
+		resultType="int">
+		select count(*) from goods where goodsName like
+		concat('%',#{name},'%') ;
+	</select>
+	
+	<!-- 根据书名模糊查询出商品数目 -->
+	<select id="selectByLike" parameterType="java.util.Map" resultMap="goodsbean">
+		select * from goods where goodsName like concat('%',#{name},'%');
+	</select>
+
+</mapper>
